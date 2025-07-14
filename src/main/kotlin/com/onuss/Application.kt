@@ -9,7 +9,6 @@ import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.example.com.onuss.firebaseNotification.sendFcmNotification
 
@@ -80,26 +79,7 @@ fun Application.module() {
 
         post("/send"){
 
-            val fcmToken = "f65L8PmoQkyykGfxSR5o9A:APA91bGq4W8p9aAeoMVCXuOMSpqEQHwUokXBTfSNT4QKLokZiYdZdWU_7TEgOtPCP-bUqajdadN2WQFJc94kifFjOYUJw4o8ltPZgf7lz0r4qM_ifzLN2K9M22f1MNtkLHmnOtNX7X4_"
-            val notificationTitle = "Test Notification"
-            val notificationBody = "This is a test notification from Ktor."
-
-            try {
-                sendFcmNotification(fcmToken){
-                    launch {
-                    }
-                }
-                call.respond(message = "GÖNDERİLDİ", status = HttpStatusCode.OK)
-
-                // FCM gönderme işlemi tamamlandıktan sonra yanıtı gönder
-
-            } catch (e: Exception) {
-                // Hata durumunu kontrol etmek için gerekli işlemleri yapabilirsiniz.
-                call.respond(
-                    message = "İstek gönderilirken bir hata oluştu: ${e.localizedMessage}",
-                    status = HttpStatusCode.InternalServerError
-                )
-            }
+            notifaticonSend(call)
 
         }
 
@@ -120,16 +100,19 @@ fun Application.module() {
                 val imageModel3 = ImageModel("https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w600/2023/10/free-images.jpg","Center",40,55)
                 val textModel = TextModel ("Fotograf Çekimleri","Center",20,1f,"#000000")
                 val textModel2 = TextModel ("Fotograf2222 Çekimleri","Center",20,1f,"#6c25be")
+                val textModel55 = TextModel ("Fotograf2222 Çekimleri","Center",20,1f,"#6c25be")
 
+                val edittext = TextModel("xzczxc","",255,1f, color = "#000000")
 
                 val component = Component("image",imageModel)
-                val component2 = Component("image",imageModel2)
+                val component2 = Component("image",edittext = edittext, image =  imageModel2)
                 val component3 = Component("image",imageModel3)
                 val component4 = Component("text", text =  textModel)
                 val component5 = Component("text",text = textModel2)
+                val component6 = Component("edittext", edittext = textModel55, text = textModel)
 
-                homeComponents.addAll(listOf(component,component4,component3))
-                mapComponents.addAll(listOf(component2,component5))
+                //homeComponents.addAll(listOf(component,component4,component3))
+                mapComponents.addAll(listOf(component2,component5,component6))
 
 
 
@@ -139,8 +122,9 @@ fun Application.module() {
 
                 segmentList.addAll(listOf(homeSegment,mapSegment))
 
-
                 call.respond(message = segmentList, status = HttpStatusCode.OK)
+
+
 
             } catch (e: Exception) {
                 call.respond(message = " ${e.message}", status = HttpStatusCode.BadRequest)
@@ -153,6 +137,28 @@ fun Application.module() {
     }
 
 
+}
+
+suspend fun notifaticonSend(call: ApplicationCall) {
+    val fcmToken = "f65L8PmoQkyykGfxSR5o9A:APA91bGq4W8p9aAeoMVCXuOMSpqEQHwUokXBTfSNT4QKLokZiYdZdWU_7TEgOtPCP-bUqajdadN2WQFJc94kifFjOYUJw4o8ltPZgf7lz0r4qM_ifzLN2K9M22f1MNtkLHmnOtNX7X4_"
+    val notificationTitle = "Test Notification"
+    val notificationBody = "This is a test notification from Ktor."
+
+    print("NOTIFICATION GİTTİ")
+    try {
+        sendFcmNotification(fcmToken){
+        }
+        call.respond(message = "GÖNDERİLDİ", status = HttpStatusCode.OK)
+
+        // FCM gönderme işlemi tamamlandıktan sonra yanıtı gönder
+
+    } catch (e: Exception) {
+        // Hata durumunu kontrol etmek için gerekli işlemleri yapabilirsiniz.
+        call.respond(
+            message = "İstek gönderilirken bir hata oluştu: ${e.localizedMessage}",
+            status = HttpStatusCode.InternalServerError
+        )
+    }
 }
 
 
@@ -168,7 +174,8 @@ data class Segment(
 data class Component(
     val type: String,
     val image : ImageModel? = null,
-    val text : TextModel? = null
+    val text : TextModel? = null,
+    val edittext : TextModel? = null
 )
 
 
@@ -191,6 +198,31 @@ data class TextModel(
     val color: String
 )
 
+
+@Serializable
+data class EditTextModel(
+    val text: String,
+    val alignment: String,
+    val fontSize: Int,
+    val fontWeight: Float,
+    val color: String
+)
+
+
+
+@Serializable
+enum class EditTextType {
+    TEXT,
+    NUMERIC,
+    DECIMAL,
+    DATE,
+    TIME
+}
+
+@Serializable
+enum class Colors(val hex : String){
+    BLACK ("#000")
+}
 
 /*
 

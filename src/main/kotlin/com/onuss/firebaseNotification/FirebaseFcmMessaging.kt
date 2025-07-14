@@ -33,7 +33,7 @@ data class FcmNotification(
     @SerializedName("ExecutionType"           ) var ExecutionType          : Int?    = -1
 )
 
-suspend fun     sendFcmNotification(fcmToken: String, finish: () -> Unit) {
+suspend fun  sendFcmNotification(fcmToken: String, finish: () -> Unit) {
     val fcmRequest = FcmRequest(
         to = fcmToken,
         data = FcmNotification(
